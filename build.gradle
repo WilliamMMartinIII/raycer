@@ -1,0 +1,21 @@
+apply plugin: 'java'
+
+group = 'placeholder'
+version = '0.0'
+description = """Ray Tracer"""
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'http://xuggle.googlecode.com/svn/trunk/repo/share/java/'
+    }
+}
+
+dependencies {
+    compile group: 'com.google.guava', name: 'guava', version: '14.0'
+    compile group: 'org.jblas', name: 'jblas', version: '1.2.4'
+    compile 'xuggle:xuggle-xuggler:5.4'
+
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.mockito:mockito-all:1.8.4'
+}
