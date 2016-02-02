@@ -18,10 +18,10 @@ public class FancyCamera extends Camera {
     public static final double EPSILON = 1.0E-10;
     public static final DoubleMatrix UP = new DoubleMatrix(new double[] {0, 1, 0});
 
-    private static final boolean NORMAL = true;
-    private static final boolean DIFFUSE = true;
-    private static final boolean SPECULAR = true;
-    private static final boolean REFLECTION = false;
+    private boolean normalEnabled = true;
+    private boolean diffuseEnabled = true;
+    private boolean specularEnabled = true;
+    private boolean reflectionEnabled = true;
 
     @Override
     public Color getColor(Ray ray) {
@@ -40,7 +40,7 @@ public class FancyCamera extends Camera {
             TextureMapping textureMapping = intersect.getGeometry().getTextureMapping();
 
             // Modify normal
-            if (NORMAL && textureMapping != null) {
+            if (normalEnabled && textureMapping != null) {
                 DoubleMatrix rotate = textureMapping.rotation(intersect, UP);
                 intersect.rotate(rotate);
             }
@@ -53,7 +53,7 @@ public class FancyCamera extends Camera {
 
             for (Light light : lights) {
                 if (light.getType() == LightType.AMBIENT) {
-                    if (DIFFUSE) {
+                    if (diffuseEnabled) {
                         // ambient
                         Color ambient;
                         if (textureMapping == null) {
@@ -86,7 +86,7 @@ public class FancyCamera extends Camera {
                     double amount = 0;
 
                     // lambertion
-                    if (DIFFUSE) {
+                    if (diffuseEnabled) {
                         amount = normal.project(a1);
                         if (amount < 0) {
                             amount = 0;
@@ -104,7 +104,7 @@ public class FancyCamera extends Camera {
                     }
 
                     // specular
-                    if (SPECULAR) {
+                    if (specularEnabled) {
                         DoubleMatrix r = (normal.mul(2 * a1.dot(normal))).sub(a1);
 
                         amount = ray.getAngle().neg().project(r);
@@ -118,13 +118,13 @@ public class FancyCamera extends Camera {
                             amount *= textureMapping.getSpecularAmount(oldIntersect);
                         }
 
-                        color = ColorUtil.add(color, ColorUtil.multiply(light.getColor(), amount));
+                        color = ColorUtil.add(color, ColorUtil.multiply(light.getColor(), amount * light.getPower()));
                     }
                 }
             }
 
             // reflection
-            if (REFLECTION) {
+            if (reflectionEnabled) {
                 double reflectionAmount;
                 if (textureMapping == null) {
                     reflectionAmount = material.getReflectAmount();
@@ -142,5 +142,25 @@ public class FancyCamera extends Camera {
         }
 
         return color;
+    }
+
+    public FancyCamera enableNormal(boolean enable) {
+        normalEnabled = enable;
+        return this;
+    }
+
+    public FancyCamera enableDiffuse(boolean enable) {
+        diffuseEnabled = enable;
+        return this;
+    }
+
+    public FancyCamera enableSpecular(boolean enable) {
+        specularEnabled = enable;
+        return this;
+    }
+
+    public FancyCamera enableReflection(boolean enable) {
+        reflectionEnabled = enable;
+        return this;
     }
 }

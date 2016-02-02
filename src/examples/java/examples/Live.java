@@ -1,14 +1,11 @@
 package examples;
 
-import ray_tracer.cameras.Camera;
-import ray_tracer.cameras.FancyCamera;
+import org.jblas.DoubleMatrix;
+import ray_tracer.MatrixUtil;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.*;
 
@@ -16,9 +13,8 @@ import java.awt.image.*;
  * Created by William Martin III on 12/25/15.
  */
 public class Live {
-    static Camera camera = new FancyCamera();
 
-    static ExampleScene scene = new ExampleScene(camera);
+    static AtomScene scene = new AtomScene();
 
     static JPanel pane;
     static Timer timer;
@@ -39,24 +35,28 @@ public class Live {
 
         @Override
         public void keyPressed(KeyEvent e) {
+            DoubleMatrix posX = new DoubleMatrix(new double[] {0.2, 0, 0});
+            DoubleMatrix posY = new DoubleMatrix(new double[] {0, 0.2, 0});
+            DoubleMatrix posZ = new DoubleMatrix(new double[] {0, 0, 0.2});
+
             switch (e.getKeyCode()) {
                 case KeyEvent.VK_RIGHT:
-                    scene.cameraPosition[0]++;
+                    scene.cameraPosition[0] += 0.2;
                     break;
                 case KeyEvent.VK_LEFT:
-                    scene.cameraPosition[0]--;
+                    scene.cameraPosition[0] -= 0.2;
                     break;
                 case KeyEvent.VK_UP:
-                    scene.cameraPosition[2]++;
+                    scene.cameraPosition[2] += 0.2;;
                     break;
                 case KeyEvent.VK_DOWN:
-                    scene.cameraPosition[2]--;
+                    scene.cameraPosition[2] -= 0.2;;
                     break;
                 case KeyEvent.VK_PAGE_UP:
-                    scene.cameraPosition[1]++;
+                    scene.cameraPosition[1] += 0.2;
                     break;
                 case KeyEvent.VK_PAGE_DOWN:
-                    scene.cameraPosition[1]--;
+                    scene.cameraPosition[1] -= 0.2;
                     break;
             }
         }
@@ -67,21 +67,42 @@ public class Live {
         }
     }
 
+    public static class MouseListener implements MouseMotionListener {
+        private Point lastPoint;
+
+        @Override
+        public void mouseDragged(MouseEvent e) {
+            if (lastPoint == null) {
+                lastPoint = e.getPoint();
+                return;
+            }
+            Point point = e.getPoint();
+            double x = -((double) point.x - lastPoint.x) / scene.WIDTH;
+            double y = ((double) point.y - lastPoint.y) / scene.HEIGHT;
+
+            DoubleMatrix angle = new DoubleMatrix(new double[] {x, y, 1.0});
+            System.out.println(angle);
+            DoubleMatrix rotation = MatrixUtil.rotate(angle, MatrixUtil.Y, MatrixUtil.Z);
+            DoubleMatrix camera = new DoubleMatrix(scene.cameraRotation);
+            scene.cameraRotation = rotation.mmul(camera).toArray();
+
+            lastPoint = e.getPoint();
+        }
+
+        @Override
+        public void mouseMoved(MouseEvent e) {
+
+        }
+    }
+
     public static void main(String[] args) {
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.addWindowListener(new java.awt.event.WindowAdapter() {
-            @Override
-            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-                camera.tearDown();
-            }
-        });
         frame.setSize((int) (scene.WIDTH * scene.ZOOM), (int) (scene.HEIGHT * scene.ZOOM));
         frame.setVisible(true);
 
         frame.addKeyListener(new KeyPressListener());
-
-        camera.setUp();
+        frame.addMouseMotionListener(new MouseListener());
 
         pane = new JPanel() {
             @Override

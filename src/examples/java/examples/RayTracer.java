@@ -6,7 +6,7 @@ import ray_tracer.background.FlatBackground;
 import ray_tracer.cameras.Camera;
 import ray_tracer.cameras.FancyCamera;
 import ray_tracer.material.Material;
-import ray_tracer.geometry.Renderable;
+import ray_tracer.geometry.Geometry;
 import ray_tracer.geometry.Sphere;
 import ray_tracer.geometry.Triangle;
 import ray_tracer.lights.Light;
@@ -61,7 +61,7 @@ public class RayTracer {
         int far = -80;
         int near = 20;
 
-        List<Renderable> geometry = new LinkedList<>();
+        List<Geometry> geometry = new LinkedList<>();
 
         geometry.add(new Triangle(
                 new DoubleMatrix(new double[]{-1.5, -5, near}),
@@ -141,10 +141,10 @@ public class RayTracer {
                 null
         ));
 
-        geometry.add(new Sphere(-4, -2, -10, 3, white, null));
-        geometry.add(new Sphere(-2, -4, -6, 1, red, null));
-        geometry.add(new Sphere(-6, -3, -4, 2, blue, null));
-        geometry.add(new Sphere(-6, -4, 2, 1, yellow, null));
+        geometry.add(new Sphere(new double[] {-4, -2, -10}, 3, white, null));
+        geometry.add(new Sphere(new double[] {-2, -4, -6}, 1, red, null));
+        geometry.add(new Sphere(new double[] {-6, -3, -4}, 2, blue, null));
+        geometry.add(new Sphere(new double[] {-6, -4, 2}, 1, yellow, null));
 
         Background background = new FlatBackground(Color.RED);
 

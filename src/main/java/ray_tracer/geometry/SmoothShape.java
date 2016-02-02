@@ -6,7 +6,7 @@ import ray_tracer.material.TextureMapping;
 /**
  * Created by William Martin on 12/30/15.
  */
-public abstract class SmoothShape extends Renderable {
+public abstract class SmoothShape extends Geometry {
     SmoothShape(Material material, TextureMapping textureMapping) {
         super(material, textureMapping);
     }

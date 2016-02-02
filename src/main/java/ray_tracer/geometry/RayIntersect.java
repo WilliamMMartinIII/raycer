@@ -1,29 +1,46 @@
 package ray_tracer.geometry;
 
 import org.jblas.DoubleMatrix;
-import org.jblas.Geometry;
 
 /**
+ * An object describing where a ray intersects with a {@link Geometry}.
+ *
+ * <p>Provides details such as the {@link Geometry} intersected, the point intersected, the surface normal of the
+ * geometry at the point of intersection, and the reflection angle given the angle of incident and the normal.
+ *
  * Created by William Martin on 12/25/15.
  */
 public class RayIntersect {
-    private Renderable geometry;
+    private Geometry geometry;
     private DoubleMatrix normal;
     private Ray reflection;
 
+    /**
+     * Copy constructor.
+     *
+     * @param rayIntersect The {@link RayIntersect} to be copied
+     */
     public RayIntersect(RayIntersect rayIntersect) {
         geometry = rayIntersect.geometry;
         normal = rayIntersect.normal;
         reflection = rayIntersect.reflection;
     }
 
-    public RayIntersect(Renderable geometry, DoubleMatrix normal, Ray reflection) {
+    /**
+     * Creates an instance based on the geometry intersected, the surface normal at the point of intersection, and the
+     * reflection angle.
+     *
+     * @param geometry The geometry intersected
+     * @param normal The surface normal at the point intersected
+     * @param reflection The angle of reflection
+     */
+    public RayIntersect(Geometry geometry, DoubleMatrix normal, Ray reflection) {
         this.geometry = geometry;
         this.normal = normal;
         this.reflection = reflection;
     }
 
-    public Renderable getGeometry() {
+    public Geometry getGeometry() {
         return geometry;
     }
 
@@ -35,8 +52,17 @@ public class RayIntersect {
         return new Ray(reflection);
     }
 
+    /**
+     * Rotates the surface normal using a 3x3 rotation matrix and modifies the reflection angle accordingly.
+     *
+     * @param rotation The matrix describing the rotation
+     */
     public void rotate(DoubleMatrix rotation) {
-        normal = Geometry.normalize(rotation.mmul(normal));
+        if (rotation.rows != 3 && rotation.columns != 3) {
+            throw new IllegalArgumentException("Rotation matrix must be a 3x3 matrix.");
+        }
+
+        normal = org.jblas.Geometry.normalize(rotation.mmul(normal));
         DoubleMatrix position = reflection.getPosition();
         DoubleMatrix angle = rotation.mmul(rotation.mmul(reflection.getAngle()));
         reflection = new Ray(position, angle);

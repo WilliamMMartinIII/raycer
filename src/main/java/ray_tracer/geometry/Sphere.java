@@ -1,28 +1,20 @@
 package ray_tracer.geometry;
 
 import org.jblas.DoubleMatrix;
-import org.jblas.Geometry;
 import ray_tracer.material.Material;
 import ray_tracer.material.TextureMapping;
 
 /**
  * Created by William Martin on 12/24/15.
  */
-public class Sphere extends Renderable {
+public class Sphere extends Geometry {
     private DoubleMatrix center;
     private double radius;
 
-    public Sphere(double x, double y, double z, double r, Material material, TextureMapping textureMapping) {
+    public Sphere(double[] position, double r, Material material, TextureMapping textureMapping) {
         super(material, textureMapping);
-        center = new DoubleMatrix(new double[]{x, y, z});
+        center = new DoubleMatrix(position);
         radius = r;
-    }
-
-    public double getRadius() { return radius; }
-
-    public DoubleMatrix getCenter()
-    {
-        return center;
     }
 
     @Override
@@ -34,9 +26,7 @@ public class Sphere extends Renderable {
         double c = position.distance2(center);
         double d = (radius * radius) - ((c * c) - (v * v));
 
-        double distance = v - Math.sqrt(d);
-
-        return distance;
+        return v - Math.sqrt(d);
     }
 
     @Override
@@ -49,7 +39,7 @@ public class Sphere extends Renderable {
 
         DoubleMatrix newPos = ray.getPosition().add(ray.getAngle().mul(distance));
         DoubleMatrix normal = newPos.sub(center);
-        DoubleMatrix newAng = Geometry.normalize(ray.getAngle().sub(normal.mul(ray.getAngle().dot(normal) * 2)));
+        DoubleMatrix newAng = org.jblas.Geometry.normalize(ray.getAngle().sub(normal.mul(ray.getAngle().dot(normal) * 2)));
         Ray reflection = new Ray(newPos, newAng);
 
         return new RayIntersect(this, normal, reflection);

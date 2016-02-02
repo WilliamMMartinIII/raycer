@@ -1,20 +1,20 @@
 package examples;
 
+import com.google.common.collect.ImmutableList;
 import org.jblas.DoubleMatrix;
-import ray_tracer.background.Background;
-import ray_tracer.background.FlatBackground;
-import ray_tracer.background.GradientBackground;
-import ray_tracer.background.SkyBox;
+import ray_tracer.background.*;
 import ray_tracer.cameras.Camera;
+import ray_tracer.cameras.CartoonCamera;
+import ray_tracer.cameras.CompositeCamera;
 import ray_tracer.cameras.FancyCamera;
-import ray_tracer.cameras.FlatCamera;
-import ray_tracer.geometry.Renderable;
+import ray_tracer.cameras.lenses.SimpleLens;
+import ray_tracer.geometry.Circle;
+import ray_tracer.geometry.Geometry;
 import ray_tracer.geometry.Sphere;
 import ray_tracer.geometry.Triangle;
 import ray_tracer.lights.AmbientLight;
 import ray_tracer.lights.Light;
 import ray_tracer.lights.PointLight;
-import ray_tracer.lights.SunLight;
 import ray_tracer.material.*;
 
 import javax.imageio.ImageIO;
@@ -35,8 +35,12 @@ public class ExampleScene {
     static final int FRAME_RATE = 30;
     static final double LENGTH = 4;
 
-    static Camera camera;
-    static double[] cameraPosition = new double[] {0, 1, -1.5};
+    public Camera camera;
+    public Camera fancyCamera;
+    public Camera diffuseCamera;
+    public Camera cartoonCamera;
+    DoubleMatrix cameraPosition = new DoubleMatrix(new double[] {0, 1, -1.5});
+    DoubleMatrix cameraRotation = new DoubleMatrix(new double[] {0, 0, -1});
 
     static Material ground = new Material.Builder()
             .color(Color.GRAY.darker())
@@ -46,9 +50,13 @@ public class ExampleScene {
             .color(Color.WHITE.darker())
             .reflectAmount(0.5)
             .build();
-    static Material emitter = new Material.Builder()
+    static Material pink = new Material.Builder()
             .color(Color.MAGENTA)
-            .emitter(true)
+            // .emitter(true)
+            .build();
+    static Material green = new Material.Builder()
+            .color(Color.GREEN.darker())
+            // .emitter(true)
             .build();
 
     static Texture brick;
@@ -57,12 +65,11 @@ public class ExampleScene {
     static TextureMapping groundMap;
     static TextureMapping ballMap;
 
-    static Background flatBackground = new FlatBackground(Color.BLACK);
+    static Background cartoonBackground = new Horizon(Color.CYAN, Color.ORANGE);
     static Background gradBackground = new GradientBackground(Color.MAGENTA, new Color(0x2A1600));
     static Background skyBackground;
 
-    public ExampleScene(Camera inputCamera) {
-        camera = inputCamera;
+    public ExampleScene() {
 
         ((GradientBackground) gradBackground).addStop(0.5, Color.ORANGE);
         ((GradientBackground) gradBackground).addStop(0.49, new Color(0x2A1600));
@@ -93,16 +100,22 @@ public class ExampleScene {
 
         ballMap = new SphereMap(brick);
 
-        camera = new FancyCamera();
-        camera.setAngle(new double[] {0, 1, -1});
-        camera.setWidth(WIDTH);
-        camera.setHeight(HEIGHT);
+        fancyCamera = new FancyCamera();
+        fancyCamera.setWidth(WIDTH);
+        fancyCamera.setHeight(HEIGHT);
+        fancyCamera.setLens(new SimpleLens(WIDTH, HEIGHT, 2.0, 3.0));
 
-        camera.setBackground(flatBackground);
+        diffuseCamera = new FancyCamera().enableReflection(false).enableSpecular(false);
+        cartoonCamera = new CartoonCamera();
+
+        camera = new CompositeCamera(ImmutableList.of(diffuseCamera, cartoonCamera), (cameras, point) ->
+            cameras.get((int) (((double)point.x) / WIDTH * cameras.size())));
+
+        camera.copy(fancyCamera);
     }
 
-    public static BufferedImage render(double frame) {
-        Collection<Renderable> geometry = new LinkedList<>();
+    public BufferedImage render(double frame) {
+        Collection<Geometry> geometry = new LinkedList<>();
 
         geometry.add(new Triangle(
                 new double[] {10, -1, -10},
@@ -119,20 +132,28 @@ public class ExampleScene {
 
         double position = frame / (FRAME_RATE * LENGTH) * (2 * Math.PI);
 
-        geometry.add(new Sphere(0, 0, 0, 1, ball, null));
-        // geometry.add(new Sphere(Math.sin(position) * -5, 0, Math.cos(position) * 5, 1, emitter, null));
+        geometry.add(new Sphere(new double[] {0, 0, 0}, 1, ball, null));
+        geometry.add(new Sphere(new double[] {Math.sin(position) * -5, 0, Math.cos(position) * 5}, 1, pink, null));
+        geometry.add(new Circle(new double[] {-3, -0.5, 0}, new double[] {-1, -0.5, 0}, new double[] {-3, -0.5, -1}, green, null));
 
         Collection<Light> lights = new LinkedList<>();
         lights.add(new PointLight(Color.white, new double[] {Math.sin(position) * 5, 2, Math.cos(position) * 5}, 0.5));
-        lights.add(new SunLight(Color.ORANGE.brighter(), new double[] {0.25, -0.5, 0}, 0.25));
-        lights.add(new SunLight(Color.blue.brighter(), new double[] {-0.25, -0.5, 0}, 0.25));
+//        lights.add(new SunLight(Color.ORANGE.brighter(), new double[] {0.25, -0.5, 0}, 0.25));
+//        lights.add(new SunLight(Color.blue.brighter(), new double[] {-0.25, -0.5, 0}, 0.25));
         lights.add(new AmbientLight(Color.WHITE, 0.25));
-        camera.setLights(lights);
 
-        camera.setGeometry(geometry);
+        fancyCamera.setLights(lights);
+        fancyCamera.setGeometry(geometry);
+        fancyCamera.setPosition(cameraPosition);
+        fancyCamera.setAngle(cameraRotation);
 
-        camera.setPosition(cameraPosition);
+        diffuseCamera.copy(fancyCamera);
+        cartoonCamera.copy(fancyCamera);
 
-        return camera.render();
+        fancyCamera.setBackground(skyBackground);
+        diffuseCamera.setBackground(skyBackground);
+        cartoonCamera.setBackground(cartoonBackground);
+
+        return fancyCamera.render();
     }
 }

@@ -15,7 +15,7 @@ public class SphereTest {
 
     @Test
     public void shouldIntersectRay() {
-        Sphere sphere = new Sphere(0, 0, 0, 10, null, null);
+        Sphere sphere = new Sphere(new double[] {0, 0, 0}, 10, null, null);
         Ray ray = new Ray(new double[]{0, 0, 20}, new double[]{0, 0, -1});
 
         RayIntersect intersect = sphere.getIntersect(ray);
@@ -27,7 +27,7 @@ public class SphereTest {
 
     @Test
     public void shouldIntersectRayStartingOnSurface() {
-        Sphere sphere = new Sphere(0, 0, 0, 10, null, null);
+        Sphere sphere = new Sphere(new double[] {0, 0, 0}, 10, null, null);
         Ray ray = new Ray(new double[]{0, 0, 10}, new double[]{0, 0, -1});
 
         RayIntersect intersect = sphere.getIntersect(ray);
@@ -40,7 +40,7 @@ public class SphereTest {
     @Test
     @Ignore
     public void shouldIntersectRayStartingInSphere() {
-        Sphere sphere = new Sphere(0, 0, 0, 10, null, null);
+        Sphere sphere = new Sphere(new double[] {0, 0, 0}, 10, null, null);
         Ray ray = new Ray(new double[]{0, 0, 0}, new double[]{0, 0, 1});
 
         RayIntersect intersect = sphere.getIntersect(ray);
@@ -52,7 +52,7 @@ public class SphereTest {
 
     @Test
     public void shouldNotIntersectRay() {
-        Sphere sphere = new Sphere(0, 0, 0, 10, null, null);
+        Sphere sphere = new Sphere(new double[] {0, 0, 0}, 10, null, null);
         Ray ray = new Ray(new double[]{0, 0, 0}, new double[]{0, 0, 1});
 
         RayIntersect intersect = sphere.getIntersect(ray);

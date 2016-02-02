@@ -10,20 +10,21 @@ import ray_tracer.material.TextureMapping;
 /**
  * Created by William Martin on 12/24/15.
  */
-public class Triangle extends Geometry {
+public class Circle extends Geometry {
     private DoubleMatrix p0;
     private DoubleMatrix u, v, normal;
+    private double radius;
 
-    public Triangle(double[] p0, double[] p1, double[] p2, Material material, TextureMapping textureMapping) {
-        this(new DoubleMatrix(p0), new DoubleMatrix(p1), new DoubleMatrix(p2), material, textureMapping);
+    public Circle(double[] center, double[] p1, double[] p2, Material material, TextureMapping textureMapping) {
+        this(new DoubleMatrix(center), new DoubleMatrix(p1), new DoubleMatrix(p2), material, textureMapping);
     }
 
-    public Triangle(DoubleMatrix p0, DoubleMatrix p1, DoubleMatrix p2, Material material, TextureMapping textureMapping) {
+    public Circle(DoubleMatrix center, DoubleMatrix p1, DoubleMatrix p2, Material material, TextureMapping textureMapping) {
         super(material, textureMapping);
-        this.p0 = p0;
+        this.p0 = center;
 
-        u = p1.sub(p0);
-        v = p2.sub(p0);
+        u = p1.sub(center);
+        v = p2.sub(center);
 
         normal = MatrixUtil.cross(u, v);
         org.jblas.Geometry.normalize(normal);
@@ -46,7 +47,7 @@ public class Triangle extends Geometry {
         try {
             DoubleMatrix solution = Solve.solve(left, right);
 
-            if(solution.get(0) < 0 || solution.get(1) < 0 || solution.get(0) + solution.get(1) > 1) {
+            if(solution.get(0) * solution.get(0) + solution.get(1) * solution.get(1) > 1) {
                 return -1.0;
             } else {
                 return solution.get(2);
