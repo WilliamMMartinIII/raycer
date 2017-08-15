@@ -13,10 +13,8 @@ Conditions are reserved. A license is expected to be chosen in the future.
 Example stone texture thanks to [RenderTextures](http://www.rendertextures.com/seamless-rock-texture-6/) (note that this
 texture has been modified from the original).
 
-Example desert skybox thanks to [komaokc](http://gamebanana.com/members/289553) (creator) (found at [GameBannana]
-(http://css.gamebanana.com/textures/2157)) released under the Creative Commons 
-[Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)]
-(http://creativecommons.org/licenses/by-nc-nd/4.0/) license.
+Example desert skybox thanks to [komaokc](http://gamebanana.com/members/289553) (creator) (found at [GameBannana](http://css.gamebanana.com/textures/2157)) released under the Creative Commons 
+[Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)](http://creativecommons.org/licenses/by-nc-nd/4.0/) license.
 
 ## Known TODO
 ### General
